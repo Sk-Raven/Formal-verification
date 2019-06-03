@@ -1,0 +1,64 @@
+﻿//=======================Model Details===========================
+enum{Ball1R,Ball2R,Ball3R,Ball4B,Ball5B,Ball6B};
+enum{Box1,Box2,Box3};
+
+var choose = -1;
+var chooseball = 1;
+var pickred = false;
+var pickbox1= false;
+var goat = -1;
+var final = false;
+var pickanother = false;
+#define goal1 pickred;
+#define goal2 pickanother;
+
+SelectBox = pcase {
+       1 : guest.Box1{choose=Box1} -> Skip
+       1 : guest.Box2{choose=Box2} -> Skip
+       1 : guest.Box3{choose=Box3} -> Skip      
+}; //选盒子
+
+SelectBall = ifa(choose==Box1){
+                 pcase{
+                        1 : guest.Ball1R{chooseball=Ball1R} -> Skip
+                        1 : guest.Ball2R{chooseball=Ball2R} -> Skip
+                      }
+              }
+              else ifa(choose==Box2) {
+                 pcase{
+                       1 : guest.Ball3R{chooseball=Ball3R} -> Skip
+                       1 : guest.Ball4B{chooseball=Ball4B} -> Skip
+                      }
+              }
+              else ifa(choose==Box3) {
+              pcase{
+                      1 : guest.Ball5B{chooseball=Ball5B} -> Skip
+                      1 : guest.Ball6B{chooseball=Ball6B} -> Skip
+                   }
+              };  //选球       
+
+CheckBall = ifb(chooseball==Ball1R||chooseball==Ball2R||chooseball==Ball3R){
+                               guest_Red{pickred = true}-> Skip
+            };//观测颜色
+
+SelectAnother  =ifa(chooseball==Ball1R){ guest_choose1{pickanother=true}->Skip }
+               
+                else ifa(chooseball==Ball2R){ guest_choose2{pickanother=true}->Skip }
+                
+                else ifa(chooseball==Ball2R){ guest_choose3{pickanother=false}->Skip }
+                 
+                else ifa(chooseball==Ball2R){ guest_choose4{pickanother=true}->Skip }
+                
+                else ifa(chooseball==Ball2R){ guest_choose5{pickanother=false}->Skip }
+                
+                else ifa(chooseball==Ball2R){ guest_choose6{pickanother=false}->Skip };
+                
+//拿另一个球
+
+Sys_CheckColor = SelectBox;SelectBall;CheckBall;
+#assert Sys_CheckColor reaches goal1 with prob;//一个球红色概率
+
+Sys_Another = SelectBox;SelectBall;CheckBall;SelectAnother;
+#assert Sys_Another reaches goal2 with prob;//第二个球红色概率
+
+
